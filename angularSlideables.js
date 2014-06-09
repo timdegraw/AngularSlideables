@@ -22,11 +22,19 @@ angular.module('angularSlideables', [])
         }
     };
 })
-.directive('slideToggle', function() {
+.directive('slideToggle', function($timeout) {
     return {
         restrict: 'A',
         link: function(scope, element, attrs) {
             var target, content;
+            var duration = '1s';
+            
+            attrs.$observe('duration', function(val){
+                if(val) {
+                    var re = /s$/;
+                    duration = parseInt(val.replace(re, ""))*1000;
+                }
+            });
             
             attrs.expanded = false;
             
@@ -39,8 +47,17 @@ angular.module('angularSlideables', [])
                     var y = content.clientHeight;
                     content.style.border = 0;
                     target.style.height = y + 'px';
+                    
+                    $timeout(function() {
+                        target.style.height =  "auto";
+                    }, duration);
+                    
                 } else {
-                    target.style.height = '0px';
+                    var y = content.clientHeight;
+                    target.style.height = y + 'px';                    
+                    $timeout(function() {
+                        target.style.height =  "0px";
+                    },1);
                 }
                 attrs.expanded = !attrs.expanded;
             });
