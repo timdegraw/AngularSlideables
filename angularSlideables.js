@@ -27,12 +27,12 @@ angular.module('angularSlideables', [])
         restrict: 'A',
         link: function(scope, element, attrs) {
             var target, content;
-            var duration = '1s';
+            var duration = '1';
+            var animating = false;
             
             attrs.$observe('duration', function(val){
                 if(val) {
-                    var re = /s$/;
-                    duration = parseInt(val.replace(re, ""))*1000;
+                    duration = parseFloat(val.replace(/s/, ""));
                 }
             });
             
@@ -42,24 +42,31 @@ angular.module('angularSlideables', [])
                 if (!target) target = document.querySelector(attrs.slideToggle);
                 if (!content) content = target.querySelector('.slideable_content');
                 
-                if(!attrs.expanded) {
-                    content.style.border = '1px solid rgba(0,0,0,0)';
-                    var y = content.clientHeight;
-                    content.style.border = 0;
-                    target.style.height = y + 'px';
-                    
-                    $timeout(function() {
-                        target.style.height =  "auto";
-                    }, duration);
-                    
-                } else {
-                    var y = content.clientHeight;
-                    target.style.height = y + 'px';                    
-                    $timeout(function() {
-                        target.style.height =  "0px";
-                    },1);
+                if(!animating) {
+                    animating = true;
+
+                    if(!attrs.expanded) {
+                        content.style.border = '1px solid rgba(0,0,0,0)';
+                        var y = content.clientHeight;
+                        content.style.border = 0;
+                        target.style.height = y + 'px';
+
+                        $timeout(function() {
+                            target.style.height =  "auto";
+                            animating = false;
+                            attrs.expanded = !attrs.expanded;
+                        }, duration*1000);
+
+                    } else {
+                        var y = content.clientHeight;
+                        target.style.height = y + 'px';                    
+                        $timeout(function() {
+                            target.style.height =  "0px";
+                            animating = false;
+                            attrs.expanded = !attrs.expanded;
+                        },1);
+                    }
                 }
-                attrs.expanded = !attrs.expanded;
             });
         }
     }
